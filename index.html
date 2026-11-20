@@ -46,7 +46,7 @@ input { font-family: inherit; }
   padding: 20px 20px 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 }
 
 .header-logo-pill {
@@ -74,24 +74,6 @@ input { font-family: inherit; }
   font-weight: 700;
   padding: 3px 8px;
   border-radius: 6px;
-}
-
-.admin-nav-link {
-  background: rgba(255, 255, 255, 0.15);
-  color: #FFFFFF;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-size: 12.5px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.15s;
-}
-
-.admin-nav-link:hover {
-  background: rgba(255, 255, 255, 0.25);
 }
 
 .hero-content {
@@ -505,15 +487,6 @@ input { font-family: inherit; }
   color: #6B7280;
 }
 
-.footer-admin-link {
-  display: inline-block;
-  margin-top: 8px;
-  font-size: 11.5px;
-  color: #0D9488;
-  font-weight: 600;
-  text-decoration: underline;
-}
-
 @media (max-width: 640px) {
   .hero-title { font-size: 26px; }
   .search-form-card { flex-direction: column; }
@@ -532,10 +505,6 @@ input { font-family: inherit; }
       <img src="logo.png" alt="Logo">
       <span class="portal-tag">Rastreamento</span>
     </div>
-    <a href="/admin" class="admin-nav-link" title="Acessar painel do administrador">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      <span>Painel Admin</span>
-    </a>
   </div>
 
   <div class="hero-content">
@@ -655,7 +624,6 @@ input { font-family: inherit; }
 <footer class="site-footer">
   <img src="logo.png" alt="Logo">
   <p>&copy; 2026 &middot; Rastreamento seguro em tempo real</p>
-  <a href="/admin" class="footer-admin-link">Acessar Painel do Administrador</a>
 </footer>
 
 <script>
