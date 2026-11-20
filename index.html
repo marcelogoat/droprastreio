@@ -342,6 +342,45 @@ input { font-family: inherit; }
   color: #111827;
 }
 
+.delivery-estimate-card {
+  margin-top: 18px;
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.estimate-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #DCFCE7;
+  color: #15803D;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.estimate-icon svg { width: 20px; height: 20px; }
+
+.estimate-label {
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #166534;
+  font-weight: 700;
+}
+
+.estimate-value {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #14532D;
+  margin-top: 2px;
+}
+
 .product-summary-line {
   margin-top: 16px;
   font-size: 13.5px;
@@ -603,6 +642,17 @@ input { font-family: inherit; }
         </div>
       </div>
 
+      <!-- Card de Previsão de Entrega -->
+      <div class="delivery-estimate-card" id="display-estimate-box">
+        <div class="estimate-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <div>
+          <div class="estimate-label">Previsão Estimada de Entrega</div>
+          <div class="estimate-value" id="display-estimate-text">3 a 6 dias úteis</div>
+        </div>
+      </div>
+
       <div class="product-summary-line">
         Produto: <strong id="display-product">Pedido Aprovado</strong> <span id="display-qty">(x1)</span>
       </div>
@@ -722,6 +772,9 @@ function renderizarResultado(data, searchVal) {
   document.getElementById('display-qty').textContent = `(x${data.quantidade || 1})`;
   document.getElementById('display-status-text').textContent = data.status || 'Em Trânsito';
 
+  // Calcular Previsão Estimada de Entrega baseada no tipo de frete (SEDEX: 3 a 6 dias úteis)
+  document.getElementById('display-estimate-text').textContent = calcularPrevisaoEntrega(data.frete, data.status, data.criadoEm);
+
   // Renderizar Timeline com ícones específicos de cada etapa
   const container = document.getElementById('timeline-container');
   container.innerHTML = '';
@@ -773,6 +826,46 @@ function renderizarResultado(data, searchVal) {
 
   document.getElementById('tracking-results').style.display = 'flex';
   document.getElementById('tracking-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function calcularPrevisaoEntrega(frete, status, criadoEm) {
+  if (status === 'Entregue') {
+    return 'Objeto entregue com sucesso';
+  }
+  
+  const baseDate = criadoEm ? new Date(criadoEm) : new Date();
+  const isSedex = (frete || '').toUpperCase().includes('SEDEX');
+  
+  // Função para somar dias úteis (pula sábado e domingo)
+  function somarDiasUteis(data, diasUteis) {
+    let d = new Date(data);
+    let adicionados = 0;
+    while (adicionados < diasUteis) {
+      d.setDate(d.getDate() + 1);
+      const diaSemana = d.getDay();
+      if (diaSemana !== 0 && diaSemana !== 6) {
+        adicionados++;
+      }
+    }
+    return d;
+  }
+
+  function formatDiaMes(d) {
+    const dia = String(d.getDate()).padStart(2, '0');
+    const mes = String(d.getMonth() + 1).padStart(2, '0');
+    return `${dia}/${mes}`;
+  }
+
+  if (isSedex) {
+    const dataMin = somarDiasUteis(baseDate, 3);
+    const dataMax = somarDiasUteis(baseDate, 6);
+    return `${formatDiaMes(dataMin)} a ${formatDiaMes(dataMax)} (3 a 6 dias úteis)`;
+  } else {
+    // Frete Grátis com Seguro (7 a 12 dias úteis)
+    const dataMin = somarDiasUteis(baseDate, 7);
+    const dataMax = somarDiasUteis(baseDate, 12);
+    return `${formatDiaMes(dataMin)} a ${formatDiaMes(dataMax)} (7 a 12 dias úteis)`;
+  }
 }
 
 function downloadInvoice() {
