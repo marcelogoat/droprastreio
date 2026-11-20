@@ -1,0 +1,109 @@
+[
+  {
+    "id": "BR948192834BZ",
+    "codigo": "BR948192834BZ",
+    "cliente": "Carlos Eduardo Silva",
+    "cpf": "123.456.789-00",
+    "produto": "Lavadora de Alta Pressão Tramontina 1200W",
+    "quantidade": 1,
+    "frete": "SEDEX Express",
+    "cidadeOrigem": "São Paulo / SP",
+    "cidadeDestino": "Curitiba / PR",
+    "status": "Em Trânsito",
+    "criadoEm": "2026-11-19T10:15:00.000Z",
+    "eventos": [
+      {
+        "titulo": "Objeto em trânsito - por favor aguarde",
+        "data": "Hoje às 14:32",
+        "descricao": "De Centro de Logística e Tratamento em São Paulo / SP para Centro de Logística e Tratamento em Curitiba / PR",
+        "local": "Centro de Tratamento em São Paulo / SP",
+        "tipo": "transito"
+      },
+      {
+        "titulo": "Objeto recebido na Unidade de Tratamento",
+        "data": "Hoje às 06:15",
+        "descricao": "Objeto conferido e integrado para processamento de triagem interestadual",
+        "local": "Centro de Logística e Tratamento em São Paulo / SP",
+        "tipo": "recebido"
+      },
+      {
+        "titulo": "Objeto em trânsito - por favor aguarde",
+        "data": "Ontem às 21:40",
+        "descricao": "De Agência dos Correios em São Paulo / SP para Centro de Logística e Tratamento em São Paulo / SP",
+        "local": "Agência dos Correios em São Paulo / SP",
+        "tipo": "transito"
+      },
+      {
+        "titulo": "Objeto postado",
+        "data": "Ontem às 16:40",
+        "descricao": "Objeto recebido pela transportadora SEDEX Express na Agência de Coleta",
+        "local": "Agência dos Correios em São Paulo / SP",
+        "tipo": "postado"
+      },
+      {
+        "titulo": "Pagamento confirmado e pedido faturado",
+        "data": "Ontem às 10:15",
+        "descricao": "Nota fiscal eletrônica emitida com sucesso e etiqueta de envio despachada",
+        "local": "Centro de Logística e Faturamento São Paulo / SP",
+        "tipo": "faturado"
+      }
+    ]
+  },
+  {
+    "id": "BR782910452BZ",
+    "codigo": "BR782910452BZ",
+    "cliente": "Mariana Oliveira Santos",
+    "cpf": "987.654.321-99",
+    "produto": "Kit Ferramentas Completo 142 Peças",
+    "quantidade": 1,
+    "frete": "PAC Correios",
+    "cidadeOrigem": "Curitiba / PR",
+    "cidadeDestino": "Rio de Janeiro / RJ",
+    "status": "Saiu para Entrega",
+    "criadoEm": "2026-11-18T08:30:00.000Z",
+    "eventos": [
+      {
+        "titulo": "Objeto saiu para entrega ao destinatário",
+        "data": "Hoje às 09:15",
+        "descricao": "Carteiro/Entregador em rota de entrega para o endereço informado",
+        "local": "Unidade de Distribuição Regional (CDD Rio de Janeiro / RJ)",
+        "tipo": "entrega"
+      },
+      {
+        "titulo": "Objeto em trânsito - por favor aguarde",
+        "data": "Hoje às 04:30",
+        "descricao": "De Centro de Logística e Tratamento em Rio de Janeiro / RJ para Unidade de Distribuição Regional (CDD Rio de Janeiro / RJ)",
+        "local": "Centro de Logística em Rio de Janeiro / RJ",
+        "tipo": "transito"
+      },
+      {
+        "titulo": "Objeto recebido pelos Correios do Brasil",
+        "data": "Ontem às 22:15",
+        "descricao": "Objeto recebido na Unidade de Tratamento de Destino para conferência e encaminhamento",
+        "local": "Centro de Logística e Tratamento em Rio de Janeiro / RJ",
+        "tipo": "recebido"
+      },
+      {
+        "titulo": "Objeto em trânsito - por favor aguarde",
+        "data": "Ontem às 11:20",
+        "descricao": "De Centro de Logística e Tratamento em Curitiba / PR para Centro de Logística e Tratamento em Rio de Janeiro / RJ",
+        "local": "Centro de Logística em Curitiba / PR",
+        "tipo": "transito"
+      },
+      {
+        "titulo": "Objeto postado",
+        "data": "18/11/2026 às 14:20",
+        "descricao": "Objeto postado na agência central",
+        "local": "Agência dos Correios em Curitiba / PR",
+        "tipo": "postado"
+      },
+      {
+        "titulo": "Pagamento confirmado e pedido faturado",
+        "data": "18/11/2026 às 08:30",
+        "descricao": "Nota fiscal emitida e separação do pedido concluída",
+        "local": "Centro Logístico Curitiba / PR",
+        "tipo": "faturado"
+      }
+    ]
+  }
+]

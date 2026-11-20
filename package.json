@@ -1,0 +1,16 @@
+{
+  "name": "portal-rastreio",
+  "version": "1.0.0",
+  "description": "Site exclusivo para rastreamento de pedidos em tempo real",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "rastreio",
+    "tracking",
+    "correios"
+  ],
+  "author": "",
+  "license": "ISC"
+}
