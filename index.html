@@ -820,10 +820,10 @@ function calcularPrevisaoEntrega(frete, status, criadoEm) {
     const dataMax = somarDiasUteis(baseDate, 6);
     return `${formatDiaMes(dataMin)} a ${formatDiaMes(dataMax)} (3 a 6 dias úteis)`;
   } else {
-    // Frete Grátis com Seguro (15 a 25 dias úteis)
-    const dataMin = somarDiasUteis(baseDate, 15);
-    const dataMax = somarDiasUteis(baseDate, 25);
-    return `${formatDiaMes(dataMin)} a ${formatDiaMes(dataMax)} (15 a 25 dias úteis)`;
+    // Frete Grátis com Seguro (8 a 12 dias úteis)
+    const dataMin = somarDiasUteis(baseDate, 8);
+    const dataMax = somarDiasUteis(baseDate, 12);
+    return `${formatDiaMes(dataMin)} a ${formatDiaMes(dataMax)} (8 a 12 dias úteis)`;
   }
 }
 
