@@ -158,12 +158,12 @@ function gerarEventosIniciais(status, origem, destino, frete) {
   const dest = destino || 'Curitiba / PR';
   const transportadora = frete || 'SEDEX Express';
 
-  // 1. Faturamento
+  // 1. Preparação / Pagamento Aprovado
   const evFaturado = {
-    titulo: 'Pagamento confirmado e pedido faturado',
+    titulo: 'Pagamento confirmado e pedido aprovado',
     data: formatDataRelativa(56),
-    descricao: `Nota fiscal eletrônica emitida com sucesso e etiqueta de envio ${transportadora} despachada`,
-    local: `Centro de Faturamento e Logística (${orig})`,
+    descricao: `Pagamento confirmado e etiqueta de envio ${transportadora} gerada para despacho`,
+    local: `Centro de Logística e Distribuição (${orig})`,
     tipo: 'faturado'
   };
 

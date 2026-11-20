@@ -391,25 +391,6 @@ input { font-family: inherit; }
   color: #111827;
 }
 
-.btn-invoice {
-  margin-top: 18px;
-  width: 100%;
-  padding: 14px;
-  background: #14453D;
-  color: #FFFFFF;
-  font-size: 14px;
-  font-weight: 700;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: background 0.15s;
-}
-
-.btn-invoice:hover { background: #0F3A33; }
-.btn-invoice svg { width: 18px; height: 18px; }
-
 /* ============ TIMELINE ============ */
 .timeline-title {
   font-size: 20px;
@@ -656,11 +637,6 @@ input { font-family: inherit; }
       <div class="product-summary-line">
         Produto: <strong id="display-product">Pedido Aprovado</strong> <span id="display-qty">(x1)</span>
       </div>
-
-      <button type="button" class="btn-invoice" id="invoice-btn" onclick="downloadInvoice()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        <span>Baixar Nota Fiscal</span>
-      </button>
     </div>
 
     <!-- CARD 2: Histórico de Movimentação -->
@@ -849,37 +825,6 @@ function calcularPrevisaoEntrega(frete, status, criadoEm) {
     const dataMax = somarDiasUteis(baseDate, 12);
     return `${formatDiaMes(dataMin)} a ${formatDiaMes(dataMax)} (7 a 12 dias úteis)`;
   }
-}
-
-function downloadInvoice() {
-  const btn = document.getElementById('invoice-btn');
-  const original = btn.innerHTML;
-  btn.innerHTML = '<span style="display:inline-block; animation: spin 1s linear infinite;">⏳</span> Gerando PDF...';
-  btn.disabled = true;
-
-  setTimeout(() => {
-    btn.innerHTML = '✓ Nota Fiscal Baixada';
-    btn.style.background = '#059669';
-
-    const code = document.getElementById('display-tracking-code').textContent;
-    const blob = new Blob([
-      '%PDF-1.4\n1 0 obj\n<< /Title (DANFE - Nota Fiscal Eletronica) /Author (Portal Rastreio) >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF'
-    ], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `DANFE-${code}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-
-    setTimeout(() => {
-      btn.innerHTML = original;
-      btn.style.background = '#14453D';
-      btn.disabled = false;
-    }, 2500);
-  }, 1000);
 }
 
 function escapeHtml(str) {
