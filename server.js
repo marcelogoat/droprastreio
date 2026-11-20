@@ -53,25 +53,9 @@ try {
   }
 } catch (err) {
   // Em ambiente serverless (Vercel), o filesystem é read-only — dados vão para Redis/KV
-  console.log('Filesystem read-only detectado, usando KV para persistência');
 }
 
-// Carrega rastreios (Nuvem ou Disco Local)
-async function carregarRastreios() {
-  if (KV_URL && KV_TOKEN) {
-    try {
-      const res = await fetch(`${KV_URL}/get/rastreios_db`, {
-        headers: { Authorization: `Bearer ${KV_TOKEN}` }
-      });
-      const data = await res.json();
-      if (data && data.result) {
-        return typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
-      }
-    } catch (err) {
-      console.error('Erro ao ler KV em nuvem:', err.message);
-    }
-  }
-
+function carregarDadosLocais() {
   try {
     const raw = fs.readFileSync(DATA_FILE, 'utf-8');
     return JSON.parse(raw);
@@ -86,18 +70,52 @@ async function carregarRastreios() {
   }
 }
 
-// Salva rastreios (Nuvem ou Disco Local com Escrita Atômica + Backup)
-async function salvarRastreios(lista) {
+// Carrega rastreios (Nuvem Upstash Redis ou Disco Local)
+async function carregarRastreios() {
   if (KV_URL && KV_TOKEN) {
     try {
-      await fetch(`${KV_URL}/set/rastreios_db`, {
+      const res = await fetch(`${KV_URL}/get/rastreios_db`, {
+        headers: { Authorization: `Bearer ${KV_TOKEN}` }
+      });
+      const data = await res.json();
+      if (data && data.result !== null && data.result !== undefined) {
+        const parsed = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+        if (Array.isArray(parsed)) return parsed;
+      }
+      
+      // Se a chave ainda não existe no Redis (primeiro acesso na nuvem), semeia com os dados iniciais
+      const dadosIniciais = carregarDadosLocais();
+      if (dadosIniciais.length > 0) {
+        salvarRastreios(dadosIniciais).catch(() => {});
+      }
+      return dadosIniciais;
+    } catch (err) {
+      console.error('Erro ao ler KV em nuvem:', err.message);
+    }
+  }
+
+  return carregarDadosLocais();
+}
+
+// Salva rastreios (Nuvem ou Disco Local com Escrita Atômica + Backup)
+async function salvarRastreios(lista) {
+  let salvoNuvem = false;
+
+  if (KV_URL && KV_TOKEN) {
+    try {
+      const payloadStr = JSON.stringify(lista);
+      const res = await fetch(`${KV_URL}/set/rastreios_db`, {
         method: 'POST',
         headers: { 
           Authorization: `Bearer ${KV_TOKEN}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'text/plain'
         },
-        body: JSON.stringify(lista)
+        body: payloadStr
       });
+      const resData = await res.json();
+      if (resData && (resData.result === 'OK' || !resData.error)) {
+        salvoNuvem = true;
+      }
     } catch (err) {
       console.error('Erro ao salvar no KV em nuvem:', err.message);
     }
@@ -112,6 +130,9 @@ async function salvarRastreios(lista) {
     fs.renameSync(TEMP_FILE, DATA_FILE);
     return true;
   } catch (err) {
+    // Em ambiente serverless (Vercel), fs falha porque é read-only
+    // Mas se salvou na nuvem, é sucesso absoluto!
+    if (salvoNuvem) return true;
     console.error('Erro ao salvar localmente:', err.message);
     return false;
   }
