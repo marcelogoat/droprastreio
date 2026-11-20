@@ -8,9 +8,23 @@ const DATA_FILE = path.join(__dirname, 'data', 'rastreios.json');
 const BACKUP_FILE = path.join(__dirname, 'data', 'rastreios.backup.json');
 const TEMP_FILE = path.join(__dirname, 'data', 'rastreios.tmp');
 
-// Suporte a Nuvem (Vercel KV / Upstash Redis para quando hospedar na Vercel)
-const KV_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-const KV_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+// Suporte a Nuvem (Detecta automaticamente Upstash, KV ou STORAGE da Vercel)
+function getEnvVal(suffix) {
+  for (const k of Object.keys(process.env)) {
+    if (k.endsWith(suffix) && process.env[k]) return process.env[k];
+  }
+  return '';
+}
+
+const KV_URL = process.env.STORAGE_REST_API_URL || 
+               process.env.UPSTASH_REDIS_REST_URL || 
+               process.env.KV_REST_API_URL || 
+               getEnvVal('_REST_API_URL') || '';
+
+const KV_TOKEN = process.env.STORAGE_REST_API_TOKEN || 
+                 process.env.UPSTASH_REDIS_REST_TOKEN || 
+                 process.env.KV_REST_API_TOKEN || 
+                 getEnvVal('_REST_API_TOKEN') || '';
 
 // Credenciais do Painel Admin
 const ADMIN_USER = 'admin';
