@@ -381,9 +381,11 @@ const requestHandler = async (req, res) => {
     try {
       const data = await parseBody(req);
       const { cliente, cpf, produto, quantidade, frete, cidadeOrigem, cidadeDestino, status } = data;
+      const origemFinal = (cidadeOrigem || 'São Paulo / SP').trim();
+      const destinoFinal = (cidadeDestino || '').trim();
 
-      if (!cliente || !cidadeOrigem || !cidadeDestino) {
-        return sendJSON(res, 400, { error: 'Campos obrigatórios: cliente, cidadeOrigem, cidadeDestino' });
+      if (!cliente || !destinoFinal) {
+        return sendJSON(res, 400, { error: 'Campos obrigatórios: cliente e cidadeDestino' });
       }
 
       let codigo = (data.codigo || '').trim().toUpperCase();
@@ -396,7 +398,7 @@ const requestHandler = async (req, res) => {
       const statusFinal = status || 'Em Trânsito';
       const eventos = data.eventos && data.eventos.length > 0 
         ? data.eventos 
-        : gerarEventosIniciais(statusFinal, cidadeOrigem, cidadeDestino, frete);
+        : gerarEventosIniciais(statusFinal, origemFinal, destinoFinal, frete);
 
       const novo = {
         id: codigo,
@@ -406,8 +408,8 @@ const requestHandler = async (req, res) => {
         produto: (produto || 'Pedido Online').trim(),
         quantidade: Number(quantidade) || 1,
         frete: (frete || 'SEDEX Express').trim(),
-        cidadeOrigem: cidadeOrigem.trim(),
-        cidadeDestino: cidadeDestino.trim(),
+        cidadeOrigem: origemFinal,
+        cidadeDestino: destinoFinal,
         status: statusFinal,
         criadoEm: new Date().toISOString(),
         eventos

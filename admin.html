@@ -32,6 +32,123 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ============ MODO ESCURO ============ */
+body.dark-mode {
+  --bg: #0F172A;
+  --card-bg: #1E293B;
+  --border: #334155;
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
+  --teal-light: rgba(13, 148, 136, 0.25);
+}
+
+body.dark-mode thead th {
+  background: #111827;
+  color: #94A3B8;
+  border-bottom-color: #334155;
+}
+
+body.dark-mode tbody tr {
+  border-bottom-color: #334155;
+}
+
+body.dark-mode tbody tr:hover {
+  background: #253349;
+}
+
+body.dark-mode .code-badge {
+  background: #334155;
+  color: #38BDF8;
+}
+
+body.dark-mode .code-badge:hover {
+  background: #475569;
+}
+
+body.dark-mode .route-cell {
+  color: #F1F5F9;
+}
+
+body.dark-mode .btn-icon {
+  background: #334155;
+  color: #CBD5E1;
+}
+
+body.dark-mode .btn-icon:hover {
+  background: #475569;
+  color: #FFFFFF;
+}
+
+body.dark-mode .search-input-field,
+body.dark-mode .filter-select,
+body.dark-mode .form-input,
+body.dark-mode .form-select {
+  background: #0F172A;
+  color: #F8FAFC;
+  border-color: #334155;
+}
+
+body.dark-mode .search-input-field:focus,
+body.dark-mode .filter-select:focus,
+body.dark-mode .form-input:focus,
+body.dark-mode .form-select:focus {
+  background: #1E293B;
+  border-color: var(--teal);
+}
+
+body.dark-mode .btn-generate-code {
+  background: #334155;
+  color: #F8FAFC;
+  border-color: #475569;
+}
+
+body.dark-mode .btn-generate-code:hover {
+  background: #475569;
+}
+
+body.dark-mode .btn-cancel {
+  background: #1E293B;
+  color: #94A3B8;
+  border-color: #334155;
+}
+
+body.dark-mode .btn-cancel:hover {
+  background: #334155;
+  color: #F8FAFC;
+}
+
+body.dark-mode .modal-header,
+body.dark-mode .modal-footer {
+  background: #111827;
+  border-color: #334155;
+}
+
+body.dark-mode .modal-content {
+  background: #1E293B;
+}
+
+body.dark-mode .form-label {
+  color: #CBD5E1;
+}
+
+body.dark-mode .login-card {
+  background: #1E293B;
+  color: #F8FAFC;
+}
+
+body.dark-mode .login-title {
+  color: #F8FAFC;
+}
+
+body.dark-mode .login-subtitle {
+  color: #94A3B8;
+}
+
+body.dark-mode .login-logo-pill {
+  background: #334155;
 }
 
 /* ============ TELA DE LOGIN ============ */
@@ -210,6 +327,25 @@ body {
 }
 
 .btn-secondary-nav:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.btn-theme-toggle {
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-theme-toggle:hover {
   background: rgba(255, 255, 255, 0.22);
 }
 
@@ -773,6 +909,10 @@ tbody td {
     </div>
 
     <div class="nav-actions">
+      <button type="button" class="btn-theme-toggle" id="btn-theme" onclick="alternarModoEscuro()" title="Alternar Modo Escuro / Claro">
+        <span id="theme-icon">🌙</span>
+        <span id="theme-label">Modo Escuro</span>
+      </button>
       <a href="/" target="_blank" class="btn-secondary-nav" title="Abrir página de consulta pública">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
         <span>Ver Tela Pública</span>
@@ -937,11 +1077,11 @@ tbody td {
         <div class="form-grid-2">
           <div class="form-group">
             <label class="form-label">Cidade de Origem (De onde vai sair) *</label>
-            <input type="text" id="novo-origem" class="form-input" placeholder="Ex: Curitiba / PR" required>
+            <input type="text" id="novo-origem" class="form-input" value="São Paulo / SP" placeholder="São Paulo / SP" required>
           </div>
           <div class="form-group">
             <label class="form-label">Cidade de Destino (Para onde vai ir) *</label>
-            <input type="text" id="novo-destino" class="form-input" placeholder="Ex: São Paulo / SP" required>
+            <input type="text" id="novo-destino" class="form-input" placeholder="Ex: Curitiba / PR ou Rio de Janeiro / RJ" required>
           </div>
         </div>
 
@@ -1266,8 +1406,8 @@ function filtrarTabela() {
 function abrirModalNovo() {
   document.getElementById('form-novo-rastreio').reset();
   gerarCodigoAleatorio();
-  document.getElementById('novo-origem').value = 'Curitiba / PR';
-  document.getElementById('novo-destino').value = 'São Paulo / SP';
+  document.getElementById('novo-origem').value = 'São Paulo / SP';
+  document.getElementById('novo-destino').value = '';
   document.getElementById('modal-novo').style.display = 'flex';
 }
 
@@ -1511,6 +1651,32 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
+
+// ─── TEMA ESCURO / CLARO ────────────────────────────────────────────────
+function aplicarTema(tema) {
+  const icon = document.getElementById('theme-icon');
+  const label = document.getElementById('theme-label');
+  if (tema === 'dark') {
+    document.body.classList.add('dark-mode');
+    if (icon) icon.textContent = '☀️';
+    if (label) label.textContent = 'Modo Claro';
+    localStorage.setItem('admin_tema', 'dark');
+  } else {
+    document.body.classList.remove('dark-mode');
+    if (icon) icon.textContent = '🌙';
+    if (label) label.textContent = 'Modo Escuro';
+    localStorage.setItem('admin_tema', 'light');
+  }
+}
+
+function alternarModoEscuro() {
+  const isDark = document.body.classList.contains('dark-mode');
+  aplicarTema(isDark ? 'light' : 'dark');
+}
+
+// Inicializar tema salvo
+const temaSalvo = localStorage.getItem('admin_tema') || 'light';
+aplicarTema(temaSalvo);
 
 // Iniciar verificação de autenticação
 verificarAutenticacao();
