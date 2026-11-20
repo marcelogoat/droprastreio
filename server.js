@@ -306,7 +306,19 @@ const requestHandler = async (req, res) => {
     return res.end();
   }
 
-  const [reqPath] = req.url.split('?');
+  let effectiveUrl = req.url || '/';
+  if (req.headers && req.headers['x-matched-path'] && req.headers['x-matched-path'].startsWith('/api')) {
+    effectiveUrl = req.headers['x-matched-path'];
+  } else if (req.headers && req.headers['x-forwarded-uri'] && req.headers['x-forwarded-uri'].startsWith('/api')) {
+    effectiveUrl = req.headers['x-forwarded-uri'];
+  } else if (effectiveUrl.includes('__url=')) {
+    const match = effectiveUrl.match(/__url=([^&]+)/);
+    if (match) {
+      effectiveUrl = decodeURIComponent(match[1]);
+    }
+  }
+
+  const [reqPath] = effectiveUrl.split('?');
 
   // ─── AUTENTICAÇÃO DO ADMIN ─────────────────────────────────────────────
 
@@ -512,12 +524,18 @@ const requestHandler = async (req, res) => {
     localFile = reqPath.replace(/^\/+/, '');
   }
 
-  let filePath = path.join(__dirname, localFile);
+  let filePath = path.join(__dirname, 'public', localFile);
+  if (!fs.existsSync(filePath)) {
+    filePath = path.join(__dirname, localFile);
+  }
+  if (!fs.existsSync(filePath)) {
+    filePath = path.join(__dirname, 'public', 'index.html');
+  }
+  if (!fs.existsSync(filePath)) {
+    filePath = path.join(__dirname, 'index.html');
+  }
 
   fs.stat(filePath, (err, stats) => {
-    if (err || !stats.isFile()) {
-      filePath = path.join(__dirname, 'index.html');
-    }
 
     const ext = path.extname(filePath).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
