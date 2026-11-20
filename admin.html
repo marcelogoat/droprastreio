@@ -1080,9 +1080,18 @@ tbody td {
             <input type="text" id="novo-origem" class="form-input" value="São Paulo / SP" placeholder="São Paulo / SP" required>
           </div>
           <div class="form-group">
-            <label class="form-label">Cidade de Destino (Para onde vai ir) *</label>
-            <input type="text" id="novo-destino" class="form-input" placeholder="Ex: Curitiba / PR ou Rio de Janeiro / RJ" required>
+            <label class="form-label">CEP de Destino (Busca Automática de Cidade)</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="novo-cep" class="form-input" placeholder="00000-000" maxlength="9" oninput="mascararEBuscarCep(this)">
+              <button type="button" class="btn-generate-code" onclick="buscarCidadePorCep()" title="Buscar Cidade pelo CEP">⚡ Buscar</button>
+            </div>
           </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Cidade de Destino (Para onde vai ir) *</label>
+          <input type="text" id="novo-destino" class="form-input" placeholder="Cole o CEP acima para preencher automático ou digite aqui" required>
+          <span id="cep-feedback" style="font-size: 12px; font-weight: 600; margin-top: 3px; display: none;"></span>
         </div>
 
         <div class="form-group">
@@ -1402,6 +1411,77 @@ function filtrarTabela() {
   renderizarTabela(filtrados);
 }
 
+// ─── BUSCA DE CIDADE POR CEP (VIACEP + BRASILAPI) ────────────────────────
+async function buscarCidadePorCep() {
+  const cepInput = document.getElementById('novo-cep');
+  const destinoInput = document.getElementById('novo-destino');
+  const feedback = document.getElementById('cep-feedback');
+  const cep = cepInput.value.replace(/\D/g, '');
+
+  if (cep.length !== 8) {
+    if (feedback) {
+      feedback.style.display = 'block';
+      feedback.style.color = '#EF4444';
+      feedback.textContent = '⚠️ Digite o CEP completo com 8 números.';
+    }
+    return;
+  }
+
+  if (feedback) {
+    feedback.style.display = 'block';
+    feedback.style.color = '#0D9488';
+    feedback.textContent = 'Consultando CEP... ⏳';
+  }
+
+  try {
+    const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+    const data = await res.json();
+    if (!data.erro && data.localidade && data.uf) {
+      const cidadeFormatada = `${data.localidade} / ${data.uf}`;
+      destinoInput.value = cidadeFormatada;
+      if (feedback) {
+        feedback.style.color = '#10B981';
+        const complemento = data.bairro ? ` (${data.bairro})` : '';
+        feedback.textContent = `✓ Cidade identificada: ${cidadeFormatada}${complemento}`;
+      }
+      return;
+    }
+  } catch (err) {}
+
+  // Fallback para BrasilAPI
+  try {
+    const resB = await fetch(`https://brasilapi.com.br/api/cep/v1/${cep}`);
+    const dataB = await resB.json();
+    if (dataB && dataB.city && dataB.state) {
+      const cidadeFormatada = `${dataB.city} / ${dataB.state}`;
+      destinoInput.value = cidadeFormatada;
+      if (feedback) {
+        feedback.style.color = '#10B981';
+        feedback.textContent = `✓ Cidade identificada: ${cidadeFormatada}`;
+      }
+      return;
+    }
+  } catch (e) {}
+
+  if (feedback) {
+    feedback.style.color = '#EF4444';
+    feedback.textContent = '❌ CEP não localizado. Digite a cidade manualmente.';
+  }
+}
+
+function mascararEBuscarCep(input) {
+  let v = input.value.replace(/\D/g, '');
+  if (v.length > 8) v = v.substring(0, 8);
+  if (v.length > 5) {
+    input.value = v.substring(0, 5) + '-' + v.substring(5);
+  } else {
+    input.value = v;
+  }
+  if (v.length === 8) {
+    buscarCidadePorCep();
+  }
+}
+
 // ─── MODAL NOVO RASTREIO ──────────────────────────────────────────────────
 function abrirModalNovo() {
   document.getElementById('form-novo-rastreio').reset();
@@ -1410,6 +1490,10 @@ function abrirModalNovo() {
   document.getElementById('novo-origem').value = 'São Paulo / SP';
   document.getElementById('novo-destino').value = '';
   document.getElementById('novo-status').value = 'Objeto Postado';
+  const cepInput = document.getElementById('novo-cep');
+  if (cepInput) cepInput.value = '';
+  const feedback = document.getElementById('cep-feedback');
+  if (feedback) feedback.style.display = 'none';
   document.getElementById('modal-novo').style.display = 'flex';
 }
 
