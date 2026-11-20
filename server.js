@@ -179,10 +179,12 @@ function gerarEventosIniciais(status, origem, destino, frete) {
   const dest = destino || 'Curitiba / PR';
   const transportadora = frete || 'SEDEX Express';
 
+  const sNorm = (status || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
   // 1. Preparação / Pagamento Aprovado
   const evFaturado = {
     titulo: 'Pagamento confirmado e pedido aprovado',
-    data: formatDataRelativa(56),
+    data: formatDataRelativa(1.5),
     descricao: `Pagamento confirmado e etiqueta de envio ${transportadora} gerada para despacho`,
     local: `Centro de Logística e Distribuição (${orig})`,
     tipo: 'faturado'
@@ -191,7 +193,7 @@ function gerarEventosIniciais(status, origem, destino, frete) {
   // 2. Postagem
   const evPostado = {
     titulo: 'Objeto postado',
-    data: formatDataRelativa(48),
+    data: formatNowBR(),
     descricao: `Objeto postado na agência dos Correios / Centro Operacional ${transportadora}`,
     local: `Agência dos Correios (${orig})`,
     tipo: 'postado'
@@ -200,7 +202,7 @@ function gerarEventosIniciais(status, origem, destino, frete) {
   // 3. Intermediário: Agência Origem ➔ Centro de Tratamento Origem
   const evRecebidoCTE_Origem = {
     titulo: 'Objeto recebido na Unidade de Tratamento',
-    data: formatDataRelativa(40),
+    data: formatDataRelativa(2),
     descricao: `Objeto conferido e integrado para processamento de triagem e despacho interestadual`,
     local: `Centro de Logística e Tratamento (${orig})`,
     tipo: 'recebido'
@@ -209,7 +211,7 @@ function gerarEventosIniciais(status, origem, destino, frete) {
   // 4. Intermediário: Centro Tratamento Origem ➔ Centro Tratamento Destino
   const evTransitoOrigemDestino = {
     titulo: 'Objeto em trânsito - por favor aguarde',
-    data: formatDataRelativa(30),
+    data: formatNowBR(),
     descricao: `De Centro de Logística e Tratamento em ${orig} para Unidade de Tratamento e Logística em ${dest}`,
     local: `Centro de Logística em ${orig}`,
     tipo: 'transito'
@@ -218,7 +220,7 @@ function gerarEventosIniciais(status, origem, destino, frete) {
   // 5. Intermediário: Chegada no Centro de Tratamento de Destino
   const evRecebidoCTE_Destino = {
     titulo: 'Objeto recebido pelos Correios do Brasil',
-    data: formatDataRelativa(18),
+    data: formatDataRelativa(3),
     descricao: `Objeto recebido na Unidade de Tratamento e Logística Regional para triagem e encaminhamento local`,
     local: `Unidade de Tratamento em ${dest}`,
     tipo: 'recebido'
@@ -227,7 +229,7 @@ function gerarEventosIniciais(status, origem, destino, frete) {
   // 6. Intermediário: Centro Tratamento Destino ➔ Centro de Distribuição Domiciliária (CDD)
   const evTransitoCDD = {
     titulo: 'Objeto em trânsito - por favor aguarde',
-    data: formatDataRelativa(10),
+    data: formatNowBR(),
     descricao: `De Unidade de Tratamento em ${dest} para Unidade de Distribuição Local (CDD)`,
     local: `Unidade de Tratamento em ${dest}`,
     tipo: 'transito'
@@ -236,7 +238,7 @@ function gerarEventosIniciais(status, origem, destino, frete) {
   // 7. Saída para Entrega ao Destinatário
   const evSaiuEntrega = {
     titulo: 'Objeto saiu para entrega ao destinatário',
-    data: formatDataRelativa(3),
+    data: formatNowBR(),
     descricao: `Carteiro/Entregador em rota para entrega no endereço do destinatário em ${dest}`,
     local: `Unidade de Distribuição (${dest})`,
     tipo: 'entrega'
@@ -245,26 +247,52 @@ function gerarEventosIniciais(status, origem, destino, frete) {
   // 8. Entregue
   const evEntregue = {
     titulo: 'Objeto entregue ao destinatário',
-    data: formatDataRelativa(0.5),
+    data: formatNowBR(),
     descricao: `Objeto entregue com sucesso para o destinatário`,
     local: dest,
     tipo: 'entregue'
   };
 
-  const sNorm = (status || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-
   if (sNorm.includes('pagamento') || sNorm.includes('faturado')) {
+    evFaturado.data = formatNowBR();
     return [evFaturado];
   } else if (sNorm.includes('postado')) {
+    evPostado.data = formatNowBR();
+    evFaturado.data = formatDataRelativa(1.5);
     return [evPostado, evFaturado];
   } else if (sNorm.includes('entregue')) {
+    evEntregue.data = formatNowBR();
+    evSaiuEntrega.data = formatDataRelativa(2);
+    evTransitoCDD.data = formatDataRelativa(5);
+    evRecebidoCTE_Destino.data = formatDataRelativa(18);
+    evTransitoOrigemDestino.data = formatDataRelativa(26);
+    evRecebidoCTE_Origem.data = formatDataRelativa(30);
+    evPostado.data = formatDataRelativa(32);
+    evFaturado.data = formatDataRelativa(34);
     return [evEntregue, evSaiuEntrega, evTransitoCDD, evRecebidoCTE_Destino, evTransitoOrigemDestino, evRecebidoCTE_Origem, evPostado, evFaturado];
   } else if (sNorm.includes('saiu') || (sNorm.includes('entrega') && !sNorm.includes('entregue'))) {
+    evSaiuEntrega.data = formatNowBR();
+    evTransitoCDD.data = formatDataRelativa(2);
+    evRecebidoCTE_Destino.data = formatDataRelativa(16);
+    evTransitoOrigemDestino.data = formatDataRelativa(24);
+    evRecebidoCTE_Origem.data = formatDataRelativa(28);
+    evPostado.data = formatDataRelativa(30);
+    evFaturado.data = formatDataRelativa(32);
     return [evSaiuEntrega, evTransitoCDD, evRecebidoCTE_Destino, evTransitoOrigemDestino, evRecebidoCTE_Origem, evPostado, evFaturado];
   } else if (sNorm.includes('distribui') || sNorm.includes('unidade')) {
+    evTransitoCDD.data = formatNowBR();
+    evRecebidoCTE_Destino.data = formatDataRelativa(4);
+    evTransitoOrigemDestino.data = formatDataRelativa(18);
+    evRecebidoCTE_Origem.data = formatDataRelativa(24);
+    evPostado.data = formatDataRelativa(26);
+    evFaturado.data = formatDataRelativa(28);
     return [evTransitoCDD, evRecebidoCTE_Destino, evTransitoOrigemDestino, evRecebidoCTE_Origem, evPostado, evFaturado];
   } else {
-    // Padrão: Em trânsito com intermediários
+    // Padrão: Em trânsito recente
+    evTransitoOrigemDestino.data = formatNowBR();
+    evRecebidoCTE_Origem.data = formatDataRelativa(2);
+    evPostado.data = formatDataRelativa(4);
+    evFaturado.data = formatDataRelativa(6);
     return [evTransitoOrigemDestino, evRecebidoCTE_Origem, evPostado, evFaturado];
   }
 }
@@ -417,7 +445,7 @@ const requestHandler = async (req, res) => {
         codigo,
         cliente: cliente.trim(),
         cpf: (cpf || '').trim(),
-        produto: (produto || 'Pedido Online').trim(),
+        produto: (produto || 'Lavadora de Alta Pressão Tramontina 1200W').trim(),
         quantidade: Number(quantidade) || 1,
         frete: (frete || 'SEDEX Express').trim(),
         cidadeOrigem: origemFinal,

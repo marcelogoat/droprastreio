@@ -1058,7 +1058,7 @@ tbody td {
         <div class="form-grid-2">
           <div class="form-group">
             <label class="form-label">Produto *</label>
-            <input type="text" id="novo-produto" class="form-input" placeholder="Ex: Lavadora 1200W" required>
+            <input type="text" id="novo-produto" class="form-input" value="Lavadora de Alta Pressão Tramontina 1200W" placeholder="Lavadora de Alta Pressão Tramontina 1200W" required>
           </div>
           <div class="form-group">
             <label class="form-label">Quantidade</label>
@@ -1088,12 +1088,12 @@ tbody td {
         <div class="form-group">
           <label class="form-label">Status Inicial do Rastreio *</label>
           <select id="novo-status" class="form-select">
+            <option value="Objeto Postado" selected>Objeto Postado (Postado hoje na agência)</option>
+            <option value="Pagamento Confirmado">Pagamento Confirmado (Preparando envio)</option>
             <option value="Em Trânsito">Em Trânsito (Entre Centros Logísticos)</option>
             <option value="Na Unidade de Distribuição">Na Unidade de Distribuição Regional (CDD)</option>
-            <option value="Saiu para Entrega">Saiu para Entrega</option>
-            <option value="Objeto Postado">Objeto Postado</option>
-            <option value="Entregue">Entregue</option>
-            <option value="Pagamento Confirmado">Pagamento Confirmado / Faturado</option>
+            <option value="Saiu para Entrega">Saiu para Entrega ao Destinatário</option>
+            <option value="Entregue">Entregue com Sucesso</option>
           </select>
           <span style="font-size: 11.5px; color: #64748B; margin-top: 2px;">
             ℹ️ O sistema gera automaticamente os intermediários dos Correios (Centros de Logística, Tratamento e CDD) entre as cidades selecionadas.
@@ -1406,8 +1406,10 @@ function filtrarTabela() {
 function abrirModalNovo() {
   document.getElementById('form-novo-rastreio').reset();
   gerarCodigoAleatorio();
+  document.getElementById('novo-produto').value = 'Lavadora de Alta Pressão Tramontina 1200W';
   document.getElementById('novo-origem').value = 'São Paulo / SP';
   document.getElementById('novo-destino').value = '';
+  document.getElementById('novo-status').value = 'Objeto Postado';
   document.getElementById('modal-novo').style.display = 'flex';
 }
 
