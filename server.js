@@ -43,12 +43,17 @@ function validarToken(req) {
   return token === VALID_TOKEN;
 }
 
-// Garantir que a pasta data e o arquivo existam
-if (!fs.existsSync(path.join(__dirname, 'data'))) {
-  fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
-}
-if (!fs.existsSync(DATA_FILE)) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify([], null, 2), 'utf-8');
+// Garantir que a pasta data e o arquivo existam (try/catch para Vercel read-only filesystem)
+try {
+  if (!fs.existsSync(path.join(__dirname, 'data'))) {
+    fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
+  }
+  if (!fs.existsSync(DATA_FILE)) {
+    fs.writeFileSync(DATA_FILE, JSON.stringify([], null, 2), 'utf-8');
+  }
+} catch (err) {
+  // Em ambiente serverless (Vercel), o filesystem é read-only — dados vão para Redis/KV
+  console.log('Filesystem read-only detectado, usando KV para persistência');
 }
 
 // Carrega rastreios (Nuvem ou Disco Local)
@@ -225,18 +230,18 @@ function gerarEventosIniciais(status, origem, destino, frete) {
     tipo: 'entregue'
   };
 
-  if (status === 'Pagamento Confirmado') {
+  const sNorm = (status || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+  if (sNorm.includes('pagamento') || sNorm.includes('faturado')) {
     return [evFaturado];
-  } else if (status === 'Objeto Postado') {
+  } else if (sNorm.includes('postado')) {
     return [evPostado, evFaturado];
-  } else if (status === 'Em Trânsito' || status === 'Em Trânsito (Entre Centros Logísticos)') {
-    return [evTransitoOrigemDestino, evRecebidoCTE_Origem, evPostado, evFaturado];
-  } else if (status === 'Na Unidade de Distribuição' || status === 'Recebido no Centro de Distribuição') {
-    return [evTransitoCDD, evRecebidoCTE_Destino, evTransitoOrigemDestino, evRecebidoCTE_Origem, evPostado, evFaturado];
-  } else if (status === 'Saiu para Entrega') {
-    return [evSaiuEntrega, evTransitoCDD, evRecebidoCTE_Destino, evTransitoOrigemDestino, evRecebidoCTE_Origem, evPostado, evFaturado];
-  } else if (status === 'Entregue') {
+  } else if (sNorm.includes('entregue')) {
     return [evEntregue, evSaiuEntrega, evTransitoCDD, evRecebidoCTE_Destino, evTransitoOrigemDestino, evRecebidoCTE_Origem, evPostado, evFaturado];
+  } else if (sNorm.includes('saiu') || (sNorm.includes('entrega') && !sNorm.includes('entregue'))) {
+    return [evSaiuEntrega, evTransitoCDD, evRecebidoCTE_Destino, evTransitoOrigemDestino, evRecebidoCTE_Origem, evPostado, evFaturado];
+  } else if (sNorm.includes('distribui') || sNorm.includes('unidade')) {
+    return [evTransitoCDD, evRecebidoCTE_Destino, evTransitoOrigemDestino, evRecebidoCTE_Origem, evPostado, evFaturado];
   } else {
     // Padrão: Em trânsito com intermediários
     return [evTransitoOrigemDestino, evRecebidoCTE_Origem, evPostado, evFaturado];
@@ -425,12 +430,25 @@ const requestHandler = async (req, res) => {
 
       if (data.novoEvento) {
         if (!item.eventos) item.eventos = [];
+        
+        // Mapeamento inteligente do tipo com base no status atual
+        let tipoEvento = data.novoEvento.tipo;
+        if (!tipoEvento || tipoEvento === 'transito') {
+          const s = (item.status || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+          if (s.includes('entregue')) tipoEvento = 'entregue';
+          else if (s.includes('saiu') || s.includes('entrega')) tipoEvento = 'entrega';
+          else if (s.includes('postado')) tipoEvento = 'postado';
+          else if (s.includes('pagamento') || s.includes('faturado')) tipoEvento = 'faturado';
+          else if (s.includes('distribui') || s.includes('recebido') || s.includes('unidade')) tipoEvento = 'recebido';
+          else tipoEvento = 'transito';
+        }
+
         item.eventos.unshift({
           titulo: data.novoEvento.titulo || `Status atualizado para ${item.status}`,
           data: data.novoEvento.data || formatNowBR(),
           descricao: data.novoEvento.descricao || `Movimentação registrada em direção a ${item.cidadeDestino}`,
           local: data.novoEvento.local || item.cidadeDestino,
-          tipo: data.novoEvento.tipo || 'transito'
+          tipo: tipoEvento
         });
       }
 

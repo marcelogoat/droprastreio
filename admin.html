@@ -1450,7 +1450,7 @@ async function salvarAtualizacaoStatus(e) {
           titulo,
           descricao: desc,
           local,
-          tipo: novoStatus.toLowerCase().includes('entrega') ? 'entrega' : 'transito'
+          tipo: (() => { const s = novoStatus.toLowerCase(); if (s === 'entregue') return 'entregue'; if (s.includes('entrega') || s.includes('saiu')) return 'entrega'; if (s.includes('postado')) return 'postado'; if (s.includes('pagamento') || s.includes('faturado')) return 'faturado'; if (s.includes('distribuição') || s.includes('recebido')) return 'recebido'; return 'transito'; })()
         }
       })
     });

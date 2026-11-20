@@ -2,4 +2,5 @@ node_modules/
 .DS_Store
 *.log
 data/rastreios.tmp
+data/rastreios.backup.json
 .vercel/

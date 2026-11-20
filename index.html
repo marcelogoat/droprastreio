@@ -709,45 +709,7 @@ async function handleTrackSubmit(e) {
       const data = await res.json();
       renderizarResultado(data, val);
     } else {
-      // Fallback: se os parâmetros de URL foram fornecidos ou se foi mock
-      const isCpf = /^\d{11}$|^\d{3}\.\d{3}\.\d{3}\-\d{2}$/.test(val);
-      const isCode = /^BR\d+.*$/.test(val) || /^BZ\d+.*$/.test(val) || val.length >= 6;
-
-      if (isCpf || isCode) {
-        // Gera mock caso ainda não tenha sido cadastrado
-        renderizarResultado({
-          codigo: isCpf ? ('BR' + Math.floor(100000000 + Math.random() * 900000000) + 'BZ') : val,
-          cliente: 'Cliente',
-          produto: 'Pedido Online',
-          quantidade: 1,
-          frete: 'SEDEX Express',
-          cidadeOrigem: 'Curitiba / PR',
-          cidadeDestino: 'São Paulo / SP',
-          status: 'Em Trânsito',
-          eventos: [
-            {
-              titulo: 'Objeto em trânsito - por favor aguarde',
-              data: 'Hoje às 14:32',
-              descricao: 'De Unidade de Tratamento em Curitiba / PR para Unidade de Distribuição Regional',
-              local: 'Curitiba / PR'
-            },
-            {
-              titulo: 'Objeto postado',
-              data: 'Ontem às 16:40',
-              descricao: 'Objeto recebido pelos Correios / Transportadora no Centro de Distribuição',
-              local: 'Curitiba / PR'
-            },
-            {
-              titulo: 'Pagamento confirmado e pedido faturado',
-              data: 'Ontem às 10:15',
-              descricao: 'Nota fiscal eletrônica emitida com sucesso e etiqueta despachada',
-              local: 'Centro Logístico'
-            }
-          ]
-        }, val);
-      } else {
-        document.getElementById('tracking-error').style.display = 'block';
-      }
+      document.getElementById('tracking-error').style.display = 'block';
     }
   } catch (err) {
     document.getElementById('tracking-error').style.display = 'block';
@@ -771,6 +733,24 @@ function renderizarResultado(data, searchVal) {
   document.getElementById('display-product').textContent = data.produto || 'Pedido Online';
   document.getElementById('display-qty').textContent = `(x${data.quantidade || 1})`;
   document.getElementById('display-status-text').textContent = data.status || 'Em Trânsito';
+
+  // Ajustar cor do badge conforme status
+  const badge = document.getElementById('display-badge');
+  const dot = badge.querySelector('.status-badge-dot');
+  const st = (data.status || '').toLowerCase();
+  if (st.includes('entregue')) {
+    badge.style.background = '#F0FDF4'; badge.style.borderColor = '#BBF7D0'; badge.style.color = '#166534';
+    dot.style.background = '#16A34A';
+  } else if (st.includes('saiu') || st === 'aguardando retirada') {
+    badge.style.background = '#FFFBEB'; badge.style.borderColor = '#FDE68A'; badge.style.color = '#92400E';
+    dot.style.background = '#D97706';
+  } else if (st.includes('pagamento') || st.includes('faturado')) {
+    badge.style.background = '#F3E8FF'; badge.style.borderColor = '#E9D5FF'; badge.style.color = '#6B21A8';
+    dot.style.background = '#7C3AED';
+  } else {
+    badge.style.background = '#ECFDF5'; badge.style.borderColor = '#D1FAE5'; badge.style.color = '#065F46';
+    dot.style.background = '#10B981';
+  }
 
   // Calcular Previsão Estimada de Entrega baseada no tipo de frete (SEDEX: 3 a 6 dias úteis)
   document.getElementById('display-estimate-text').textContent = calcularPrevisaoEntrega(data.frete, data.status, data.criadoEm);
@@ -831,6 +811,9 @@ function renderizarResultado(data, searchVal) {
 function calcularPrevisaoEntrega(frete, status, criadoEm) {
   if (status === 'Entregue') {
     return 'Objeto entregue com sucesso';
+  }
+  if (status === 'Pagamento Confirmado') {
+    return 'Aguardando envio pela transportadora';
   }
   
   const baseDate = criadoEm ? new Date(criadoEm) : new Date();
